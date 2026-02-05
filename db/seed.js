@@ -18,15 +18,11 @@ try {
   console.error("Error seeding database:", error);
   try {
     await db.end();
-  } catch (e) {
-    // Ignore errors when closing
-  }
+  } catch (e) {}
   process.exit(1);
 }
 
 async function seed() {
-  // Create users
-  console.log("Creating users...");
   const user1 = await createUser(
     "john_doe",
     "password123",
@@ -54,7 +50,6 @@ async function seed() {
   );
   console.log("User 3 created");
 
-  // Create hospitals
   console.log("Creating hospitals...");
   const hospital1 = await createHospital(
     "City General Hospital",
