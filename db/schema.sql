@@ -13,7 +13,8 @@ CREATE TABLE users (
   password text NOT NULL,
   email text NOT NULL,
   bio text,
-  resume text
+  resume text,
+  profile_picture text
 );
 
 CREATE TABLE hospitals (

@@ -2,15 +2,20 @@ import express from "express";
 const router = express.Router();
 export default router;
 
-import { createUser, getUserByUsernameAndPassword } from "#db/queries/users";
+import {
+  createUser,
+  getUserByUsernameAndPassword,
+  getUserById,
+} from "#db/queries/users";
 import requireBody from "#middleware/requireBody";
+import getUserFromToken from "#middleware/getUserFromToken";
 import { createToken } from "#utils/jwt";
 
 router
   .route("/register")
-  .post(requireBody(["username", "password"]), async (req, res) => {
-    const { username, password } = req.body;
-    const user = await createUser(username, password);
+  .post(requireBody(["email", "username", "password"]), async (req, res) => {
+    const { email, username, password } = req.body;
+    const user = await createUser(username, password, email);
 
     const token = await createToken({ id: user.id });
     res.status(201).send(token);
@@ -26,3 +31,12 @@ router
     const token = await createToken({ id: user.id });
     res.send(token);
   });
+
+router.route("/me").get(getUserFromToken, async (req, res) => {
+  const user = await getUserById(req.user.id);
+  if (!user) return res.status(404).send("User not found");
+
+  // Remove password from response
+  const { password, ...userWithoutPassword } = user;
+  res.json(userWithoutPassword);
+});

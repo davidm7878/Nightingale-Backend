@@ -16,11 +16,16 @@ const router = express.Router();
 // Search hospitals from CMS API
 router.get("/search", async (req, res, next) => {
   try {
-    const { city, state, name, limit } = req.query;
+    const { city, state, name, facilityId, limit } = req.query;
 
     let results;
 
-    if (name) {
+    if (facilityId) {
+      // Search by facility ID from CMS API
+      const { searchHospitalByFacilityId } = await import("#utils/cmsApi");
+      results = await searchHospitalByFacilityId(facilityId);
+      return res.json(results ? [results] : []);
+    } else if (name) {
       results = await searchHospitalByName(name, limit ? parseInt(limit) : 10);
     } else if (city || state) {
       results = await searchHospitalsByCMS(
@@ -31,7 +36,9 @@ router.get("/search", async (req, res, next) => {
     } else {
       return res
         .status(400)
-        .json({ error: "Please provide city, state, or name to search" });
+        .json({
+          error: "Please provide city, state, name, or facilityId to search",
+        });
     }
 
     res.json(results);
