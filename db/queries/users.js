@@ -44,3 +44,16 @@ export async function getUserById(id) {
   } = await db.query(sql, [id]);
   return user;
 }
+
+export async function updateUserProfile(id, bio, resume) {
+  const sql = `
+  UPDATE users
+  SET bio = $2, resume = $3
+  WHERE id = $1
+  RETURNING *
+  `;
+  const {
+    rows: [user],
+  } = await db.query(sql, [id, bio, resume]);
+  return user;
+}
