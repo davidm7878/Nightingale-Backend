@@ -9,19 +9,24 @@ import {
   updateHospital,
   deleteHospital,
 } from "#db/queries/hospitals";
-import { searchHospitalsByCMS, searchHospitalByName } from "#utils/cmsApi";
+import {
+  searchHospitalsByCMS,
+  searchHospitalByName,
+  searchHospitalsByZipcode,
+} from "#utils/cmsApi";
 
 const router = express.Router();
 
 // Search hospitals from CMS API
 router.get("/search", async (req, res, next) => {
   try {
-    const { city, state, name, facilityId, limit } = req.query;
+    const { city, state, name, zipcode, facilityId, limit } = req.query;
 
     console.log("Hospital search request:", {
       city,
       state,
       name,
+      zipcode,
       facilityId,
       limit,
     });
@@ -33,6 +38,13 @@ router.get("/search", async (req, res, next) => {
       const { searchHospitalByFacilityId } = await import("#utils/cmsApi");
       results = await searchHospitalByFacilityId(facilityId);
       return res.json(results ? [results] : []);
+    } else if (zipcode) {
+      console.log("Searching by zipcode:", zipcode, "state:", state);
+      results = await searchHospitalsByZipcode(
+        zipcode,
+        state,
+        limit ? parseInt(limit) : 100,
+      );
     } else if (name) {
       console.log("Searching by name:", name);
       results = await searchHospitalByName(name, limit ? parseInt(limit) : 50);
@@ -44,7 +56,8 @@ router.get("/search", async (req, res, next) => {
       );
     } else {
       return res.status(400).json({
-        error: "Please provide city, state, name, or facilityId to search",
+        error:
+          "Please provide city, state, name, zipcode, or facilityId to search",
       });
     }
 
