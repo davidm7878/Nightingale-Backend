@@ -85,6 +85,9 @@ export async function searchHospitalByName(name, limit = 10) {
       ],
     };
 
+    console.log("Searching hospitals by name:", name);
+    console.log("Request body:", JSON.stringify(requestBody, null, 2));
+
     const response = await fetch(CMS_API_BASE, {
       method: "POST",
       headers: {
@@ -100,6 +103,7 @@ export async function searchHospitalByName(name, limit = 10) {
     }
 
     const data = await response.json();
+    console.log("CMS API returned:", data.results?.length || 0, "hospitals");
 
     return data.results.map((hospital) => ({
       cms_id: hospital.facility_id,

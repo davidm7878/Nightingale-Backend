@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS likes CASCADE;
 DROP TABLE IF EXISTS dislikes CASCADE;
+DROP TABLE IF EXISTS comments CASCADE;
 DROP TABLE IF EXISTS ratings CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS posts CASCADE;
@@ -57,4 +58,10 @@ CREATE TABLE dislikes (
   post_id integer NOT NULL REFERENCES posts(id) ON DELETE CASCADE
 );
 
-
+CREATE TABLE comments (
+  id serial PRIMARY KEY,
+  user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  post_id integer NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  body text NOT NULL,
+  created_at timestamp DEFAULT CURRENT_TIMESTAMP
+);

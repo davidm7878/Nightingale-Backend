@@ -18,6 +18,14 @@ router.get("/search", async (req, res, next) => {
   try {
     const { city, state, name, facilityId, limit } = req.query;
 
+    console.log("Hospital search request:", {
+      city,
+      state,
+      name,
+      facilityId,
+      limit,
+    });
+
     let results;
 
     if (facilityId) {
@@ -26,7 +34,8 @@ router.get("/search", async (req, res, next) => {
       results = await searchHospitalByFacilityId(facilityId);
       return res.json(results ? [results] : []);
     } else if (name) {
-      results = await searchHospitalByName(name, limit ? parseInt(limit) : 10);
+      console.log("Searching by name:", name);
+      results = await searchHospitalByName(name, limit ? parseInt(limit) : 50);
     } else if (city || state) {
       results = await searchHospitalsByCMS(
         city,
@@ -34,15 +43,15 @@ router.get("/search", async (req, res, next) => {
         limit ? parseInt(limit) : 100,
       );
     } else {
-      return res
-        .status(400)
-        .json({
-          error: "Please provide city, state, name, or facilityId to search",
-        });
+      return res.status(400).json({
+        error: "Please provide city, state, name, or facilityId to search",
+      });
     }
 
+    console.log("Sending results:", results?.length || 0, "hospitals");
     res.json(results);
   } catch (error) {
+    console.error("Hospital search error:", error);
     next(error);
   }
 });
