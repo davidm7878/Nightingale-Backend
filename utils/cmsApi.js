@@ -73,20 +73,13 @@ export async function searchHospitalsByCMS(
 
 export async function searchHospitalByName(name, limit = 10) {
   try {
+    // Fetch a large set and filter client-side since LIKE may not work
     const requestBody = {
-      limit: limit,
+      limit: 1000,
       offset: 0,
-      conditions: [
-        {
-          property: "facility_name",
-          value: `%${name.toUpperCase()}%`,
-          operator: "LIKE",
-        },
-      ],
     };
 
     console.log("Searching hospitals by name:", name);
-    console.log("Request body:", JSON.stringify(requestBody, null, 2));
 
     const response = await fetch(CMS_API_BASE, {
       method: "POST",
@@ -104,7 +97,20 @@ export async function searchHospitalByName(name, limit = 10) {
 
     const data = await response.json();
 
-    return data.results.map((hospital) => ({
+    // Filter results client-side by name (case-insensitive partial match)
+    const nameUpper = name.toUpperCase();
+    const filteredResults = data.results.filter(
+      (hospital) =>
+        hospital.facility_name &&
+        hospital.facility_name.toUpperCase().includes(nameUpper),
+    );
+
+    console.log(
+      `Filtered ${data.results.length} hospitals to ${filteredResults.length} matching "${name}"`,
+    );
+
+    // Return limited results
+    return filteredResults.slice(0, limit).map((hospital) => ({
       cms_id: hospital.facility_id,
       name: hospital.facility_name,
       street: hospital.address,

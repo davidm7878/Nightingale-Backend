@@ -42,6 +42,15 @@ router.route("/me").get(getUserFromToken, async (req, res) => {
   res.json(userWithoutPassword);
 });
 
+router.route("/:id").get(async (req, res) => {
+  const user = await getUserById(req.params.id);
+  if (!user) return res.status(404).send("User not found");
+
+  // Remove password from response
+  const { password, ...userWithoutPassword } = user;
+  res.json(userWithoutPassword);
+});
+
 router.route("/profile").put(getUserFromToken, async (req, res) => {
   const { bio, resume } = req.body;
   const user = await updateUserProfile(req.user.id, bio, resume);
